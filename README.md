@@ -4,6 +4,16 @@ DeepSeek Harness 的 web profile 插件：在官方界面上叠加羊皮纸 / �
 
 不改官方仓库。装上之后走 Loader，和官方插件同一套机制。
 
+## 预览
+
+浅色：
+
+![浅色主题](docs/light.png)
+
+深色：
+
+![深色主题](docs/dark.png)
+
 ## 安装
 
 把仓库推到 GitHub 后，把下面的 `你的账号` 换成你的用户名：
