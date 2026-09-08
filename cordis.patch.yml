@@ -1,0 +1,5 @@
+# Applied when this package is added with `dsh plugin --profile web add`.
+
+- insert:
+    - id: ui-celestial
+      name: 'dsh-client-ui-celestial'

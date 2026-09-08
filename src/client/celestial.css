@@ -1,0 +1,163 @@
+/* Decorative celestial skin. Official CSS modules stay untouched. */
+
+:root {
+  --dsh-celestial-gold: #ae843b;
+  --dsh-celestial-panel: #fbf7ec;
+  --dsh-celestial-base: #f3ead3;
+  --dsh-font-display: 'Songti SC', STSong, 'Noto Serif CJK SC', SimSun, serif;
+}
+
+body[data-ds-dark-theme] {
+  --dsh-celestial-gold: #c9a254;
+  --dsh-celestial-panel: #101f34;
+  --dsh-celestial-base: #071729;
+}
+
+[data-dsh-celestial-host],
+[data-dsh-celestial-stage] {
+  position: fixed;
+  inset: 0;
+  z-index: 0;
+  overflow: hidden;
+  pointer-events: none !important;
+  --dsh-celestial-art-opacity-light: 0.22;
+  --dsh-celestial-art-opacity-dark: 0.28;
+  --dsh-celestial-particle-opacity-light: 0.16;
+  --dsh-celestial-particle-opacity-dark: 0.2;
+  --dsh-celestial-vignette-opacity: 0.42;
+  --dsh-celestial-reading-x: 60%;
+  --dsh-celestial-particle-mask: radial-gradient(
+    ellipse 40% 72% at var(--dsh-celestial-reading-x) 50%,
+    transparent 0%,
+    rgb(0 0 0 / 0.12) 48%,
+    rgb(0 0 0 / 0.72) 78%,
+    #000 100%
+  );
+}
+
+[data-dsh-celestial-stage][data-hero] {
+  --dsh-celestial-art-opacity-light: 0.78;
+  --dsh-celestial-art-opacity-dark: 0.9;
+  --dsh-celestial-particle-opacity-light: 0.42;
+  --dsh-celestial-particle-opacity-dark: 0.5;
+  --dsh-celestial-vignette-opacity: 0.82;
+  --dsh-celestial-reading-x: calc(50% + 64px);
+  --dsh-celestial-particle-mask: radial-gradient(
+    ellipse 390px 235px at var(--dsh-celestial-reading-x) 53%,
+    transparent 0%,
+    rgb(0 0 0 / 0.08) 46%,
+    rgb(0 0 0 / 0.68) 76%,
+    #000 100%
+  );
+}
+
+[data-dsh-celestial-art],
+[data-dsh-celestial-vignette] {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+}
+
+[data-dsh-celestial-art] {
+  background-position: center;
+  background-repeat: no-repeat;
+  background-size: cover;
+  transition: opacity 300ms var(--ds-ease-in-out, ease);
+}
+
+[data-dsh-celestial-art='light'] {
+  background-image: var(--dsh-celestial-light-image);
+  opacity: var(--dsh-celestial-art-opacity-light);
+}
+
+[data-dsh-celestial-art='dark'] {
+  background-image: var(--dsh-celestial-dark-image);
+  opacity: 0;
+}
+
+body[data-ds-dark-theme] [data-dsh-celestial-art='light'] {
+  opacity: 0;
+}
+
+body[data-ds-dark-theme] [data-dsh-celestial-art='dark'] {
+  opacity: var(--dsh-celestial-art-opacity-dark);
+}
+
+[data-dsh-celestial-vignette] {
+  background: radial-gradient(
+    ellipse 370px 220px at var(--dsh-celestial-reading-x) 53%,
+    color-mix(in srgb, var(--dsh-celestial-base) 92%, transparent) 0%,
+    color-mix(in srgb, var(--dsh-celestial-base) 72%, transparent) 42%,
+    transparent 78%
+  );
+  opacity: var(--dsh-celestial-vignette-opacity);
+}
+
+[data-dsh-particle-field] {
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+  display: block;
+  width: 100%;
+  height: 100%;
+  pointer-events: none;
+  opacity: var(--dsh-celestial-particle-opacity-light, 0.12);
+  -webkit-mask-image: var(--dsh-celestial-particle-mask);
+  mask-image: var(--dsh-celestial-particle-mask);
+  -webkit-mask-mode: alpha;
+  mask-mode: alpha;
+}
+
+body[data-ds-dark-theme] [data-dsh-particle-field] {
+  opacity: var(--dsh-celestial-particle-opacity-dark, 0.16);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  [data-dsh-celestial-art] {
+    transition: none;
+  }
+}
+
+#root {
+  position: relative;
+  z-index: 1;
+  background: transparent;
+}
+
+[data-dsh-celestial-chrome] {
+  position: fixed;
+  inset: 0;
+  z-index: 40;
+  pointer-events: none;
+}
+
+[data-dsh-window-titlebar] {
+  position: fixed;
+  inset: 0 0 auto;
+  z-index: 40;
+  height: var(--dsh-window-titlebar-height, 0px);
+  pointer-events: none;
+  background:
+    linear-gradient(
+      color-mix(in srgb, var(--dsh-celestial-gold) 42%, transparent),
+      color-mix(in srgb, var(--dsh-celestial-gold) 42%, transparent)
+    ) bottom / 100% 1px no-repeat,
+    color-mix(in srgb, var(--dsh-celestial-panel) 84%, transparent);
+  backdrop-filter: blur(12px) saturate(108%);
+}
+
+[data-dsh-window-drag-region] {
+  position: fixed;
+  top: var(--dsh-window-titlebar-y, 0px);
+  left: var(--dsh-window-titlebar-x, 0px);
+  z-index: 41;
+  width: var(--dsh-window-titlebar-width, 0px);
+  height: var(--dsh-window-titlebar-height, 0px);
+  pointer-events: auto;
+  user-select: none;
+  -webkit-app-region: drag;
+}
+
+h1, h2, .dsh-display {
+  font-family: var(--dsh-font-display);
+}
