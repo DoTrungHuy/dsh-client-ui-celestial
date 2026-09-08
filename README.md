@@ -16,10 +16,8 @@ DeepSeek Harness 的 web profile 插件：在官方界面上叠加羊皮纸 / �
 
 ## 安装
 
-把仓库推到 GitHub 后，把下面的 `你的账号` 换成你的用户名：
-
 ```sh
-dsh plugin --profile web add github:你的账号/dsh-client-ui-celestial
+dsh plugin --profile web add github:DoTrungHuy/dsh-client-ui-celestial
 ```
 
 这条命令会把包装进 web profile，并自动写入 Loader 行。然后重新启动：
