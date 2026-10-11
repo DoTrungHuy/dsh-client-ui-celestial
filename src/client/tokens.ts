@@ -1,6 +1,13 @@
 /** Palette overrides stacked on the built-in light/dark themes. */
 export const CELESTIAL_TOKENS = {
-  '--dsw-alias-bg-base': { light: '#f3ead3', dark: '#071729' },
+  // NOTE: `--dsw-alias-bg-base` is deliberately NOT listed here.
+  //
+  // The presenter writes this token as an inline style on <body>, and an inline
+  // style outranks anything set through `overrideTokens` (same mechanism, later
+  // write wins — and the presenter always writes last). The rule that actually
+  // wins lives in `celestial.css`, where the value carries `!important` and so
+  // outranks the inline declaration. Declaring it in both places would only
+  // invite confusion about which one is live.
   '--dsw-alias-bg-layer-1': {
     light: 'color-mix(in srgb, #fbf7ec 92%, transparent)',
     dark: 'color-mix(in srgb, #101f34 92%, transparent)',
@@ -13,6 +20,14 @@ export const CELESTIAL_TOKENS = {
     light: 'color-mix(in srgb, #fffaf0 96%, transparent)',
     dark: 'color-mix(in srgb, #172c46 94%, transparent)',
   },
+  // Desktop document preview (0.2.0-rc.2) paints PDF pages from these three
+  // tokens. Leaving them unset keeps the stock bluish gray behind the skin.
+  '--dsw-alias-bg-document-preview': { light: '#eee4cd', dark: '#071729' },
+  '--dsw-alias-bg-document-selection': {
+    light: 'color-mix(in srgb, rgb(65, 118, 230) 40%, transparent)',
+    dark: 'color-mix(in srgb, rgb(103, 158, 254) 40%, transparent)',
+  },
+  '--dsw-alias-label-document-preview': { light: '#5c5348', dark: '#c7bda9' },
   '--dsw-alias-bg-module-platform': { light: '#eee4cd', dark: '#162943' },
   '--dsw-alias-bg-multi-select': { light: '#eee4cd', dark: '#162943' },
   '--dsw-alias-bg-skeleton': { light: 'rgb(48 43 37 / 0.06)', dark: 'rgb(241 232 213 / 0.08)' },
@@ -70,8 +85,8 @@ export const CELESTIAL_TOKENS = {
   '--dsw-specific-menu': { light: '#fbf7ec', dark: '#14263d' },
   '--dsw-specific-selector': { light: '#eee4cd', dark: '#162943' },
   '--dsw-specific-sidebar-fill': {
-    light: 'color-mix(in srgb, #f7efdc 78%, transparent)',
-    dark: 'color-mix(in srgb, #0d1c30 82%, transparent)',
+    light: 'color-mix(in srgb, #f7efdc 62%, transparent)',
+    dark: 'color-mix(in srgb, #0d1c30 62%, transparent)',
   },
   '--dsw-specific-sidebar-nav-item-active': {
     light: 'color-mix(in srgb, rgb(228, 237, 253) 58%, #fbf7ec)',

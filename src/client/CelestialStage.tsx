@@ -38,6 +38,10 @@ function heroIsVisible(): boolean {
   return document.querySelector('[data-phase="hero"]') !== null
 }
 
+function transcriptIsOpen(): boolean {
+  return document.querySelector('[data-phase="active"]') !== null
+}
+
 type StageStyle = CSSProperties & {
   '--dsh-celestial-light-image': string
   '--dsh-celestial-dark-image': string
@@ -50,17 +54,19 @@ type ChromeStyle = CSSProperties & {
   '--dsh-window-titlebar-height': string
 }
 
-function useHeroVisible(): boolean {
-  const [hero, setHero] = useState(heroIsVisible)
+function usePhaseFlags(): { readonly hero: boolean, readonly transcript: boolean } {
+  const [flags, setFlags] = useState(() => ({ hero: heroIsVisible(), transcript: transcriptIsOpen() }))
   useEffect(() => {
     const root = document.getElementById('root')
     if (root === null || typeof MutationObserver === 'undefined') return
-    const observer = new MutationObserver(() => { setHero(heroIsVisible()) })
-    observer.observe(root, { subtree: true, attributes: true, attributeFilter: ['data-phase'] })
-    setHero(heroIsVisible())
+    const observer = new MutationObserver(() => {
+      setFlags({ hero: heroIsVisible(), transcript: transcriptIsOpen() })
+    })
+    observer.observe(root, { subtree: true, childList: true, attributes: true, attributeFilter: ['data-phase'] })
+    setFlags({ hero: heroIsVisible(), transcript: transcriptIsOpen() })
     return () => { observer.disconnect() }
   }, [])
-  return hero
+  return flags
 }
 
 function useTitleBarGeometry(): TitleBarGeometry {
@@ -78,7 +84,7 @@ function useTitleBarGeometry(): TitleBarGeometry {
 
 /** Artwork and particle field behind the official shell. */
 export function CelestialBackdrop(): ReactElement {
-  const hero = useHeroVisible()
+  const { hero, transcript } = usePhaseFlags()
   const style: StageStyle = {
     pointerEvents: 'none',
     '--dsh-celestial-light-image': cssImage(parchmentArt),
@@ -88,6 +94,7 @@ export function CelestialBackdrop(): ReactElement {
     <div
       data-dsh-celestial-stage
       data-hero={hero || undefined}
+      data-transcript={transcript || undefined}
       style={style}
       aria-hidden="true"
     >

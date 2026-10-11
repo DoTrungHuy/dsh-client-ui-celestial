@@ -57,6 +57,7 @@ const cssVirtual = {
         '  document.head.appendChild(tag);',
         '}',
         'export default {};',
+        '',
       ].join('\n')
       return { contents: js, loader: 'js' }
     })

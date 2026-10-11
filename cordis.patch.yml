@@ -1,4 +1,7 @@
-# Applied when this package is added with `dsh plugin --profile web add`.
+# Applied when this package is added with `dsh plugin add`.
+# Inserts the Loader row so the profile does not need a hand-written entry.
+# The row name is the package name: the client module system resolves it from
+# the profile and publishes lib/client.js itself.
 
 - insert:
     - id: ui-celestial

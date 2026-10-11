@@ -13,6 +13,85 @@ body[data-ds-dark-theme] {
   --dsh-celestial-base: #071729;
 }
 
+/* ---------------------------------------------------------------------------
+   Make the backdrop visible without touching any shell stylesheet.
+
+   The desktop shell paints `--dsw-alias-bg-base` as an opaque fill on both
+   AppFrame `.frame` and ConversationRoot `.root`. Those two boxes sit above
+   the artwork, so a tinted token still reads as an empty panel. The Electron
+   window itself is also opaque, so the token cannot be fully transparent or
+   the stock `#181818` chrome shows through the gaps.
+
+   `body` keeps the solid celestial base. The token used by the two full-bleed
+   shells is transparent, which lets the stage (a body child, behind `#root`)
+   show through. `!important` outranks the theme presenter's inline token
+   writes; the shell never marks these properties important.
+   --------------------------------------------------------------------------- */
+body {
+  --dsw-alias-bg-base: transparent !important;
+  background-color: var(--dsh-celestial-base) !important;
+  background-image: var(--dsh-celestial-light-image) !important;
+  background-position: left center !important;
+  background-repeat: no-repeat !important;
+  background-size: cover !important;
+}
+
+body[data-ds-dark-theme] {
+  --dsw-alias-bg-base: transparent !important;
+  background-color: var(--dsh-celestial-base) !important;
+  background-image: var(--dsh-celestial-dark-image) !important;
+  background-position: 68% center !important;
+  background-repeat: no-repeat !important;
+  background-size: cover !important;
+}
+
+/* The frame and the conversation column are the two boxes that hide the
+   stage. Attribute selectors survive CSS-module hashes. */
+[data-sidebar-collapsed],
+[data-details-collapsed],
+[data-dragging],
+[data-phase='hero'],
+[data-phase='active'],
+[data-phase='settling'] {
+  background: transparent !important;
+  background-color: transparent !important;
+}
+
+/* Active transcripts keep the same full composition as the landing screen.
+   The reading surface belongs to the scrollport, which starts below the
+   session header: the header stays on the sky, and the transcript gets one
+   solid panel instead of a fade that cuts through a planet. */
+[data-phase='active'] [data-conversation-scroll]::before,
+[data-phase='settling'] [data-conversation-scroll]::before {
+  content: '';
+  position: absolute;
+  z-index: 0;
+  inset: 0;
+  pointer-events: none;
+  background-color: var(--dsh-celestial-base);
+  border-top: 1px solid color-mix(in srgb, var(--dsh-celestial-gold) 28%, transparent);
+}
+
+[data-phase='active'] [data-conversation-scroll] > *,
+[data-phase='settling'] [data-conversation-scroll] > * {
+  position: relative;
+  z-index: 1;
+}
+
+/* Document preview lives in the same window, but its page surface is opaque
+   and reads `--dsw-alias-bg-document-preview` directly. The token override
+   covers the steady state; these important declarations also win while the
+   presenter is still writing the stock palette during the first frame. */
+body {
+  --dsw-alias-bg-document-preview: var(--dsh-celestial-panel) !important;
+  --dsw-alias-label-document-preview: #5c5348 !important;
+}
+
+body[data-ds-dark-theme] {
+  --dsw-alias-bg-document-preview: var(--dsh-celestial-base) !important;
+  --dsw-alias-label-document-preview: #c7bda9 !important;
+}
+
 [data-dsh-celestial-host],
 [data-dsh-celestial-stage] {
   position: fixed;
@@ -20,11 +99,32 @@ body[data-ds-dark-theme] {
   z-index: 0;
   overflow: hidden;
   pointer-events: none !important;
-  --dsh-celestial-art-opacity-light: 0.22;
-  --dsh-celestial-art-opacity-dark: 0.28;
+  /* The artwork sits at z-index 0; the shell stacks two full-bleed
+     `--dsw-alias-bg-base` containers above it in the steady state (AppFrame
+     `.frame` and ConversationRoot `.root`; `.boot` only exists during load), so
+     the visible transmission is the product of both alphas.
+
+     At 30% that product was (1-0.30)^2 ≈ 49%, and the dark-theme artwork is a
+     deep-navy sky — 49% of an already-dark image reads as "no backdrop at all"
+     on screen. 12% leaves ≈77%, which is what actually makes it legible.
+     Verified against a live screenshot at 15:38 rather than by arithmetic
+     alone: the art was reaching the eye all along, just far too dim. */
+  --dsh-celestial-art-opacity-light: 0.72;
+  /* Dark mode: the artwork is a deep-navy sky, so the two stacked
+     `--dsw-alias-bg-base` layers above it cost the most here — and the loss is
+     worst on narrow windows, where `background-size: cover` has to crop and
+     there is simply less lit area to survive. 0.95 keeps the gold linework
+     clearly readable at the default window size without the night sky going
+     flat. Overridden per width by the media queries at the end of this sheet. */
+  --dsh-celestial-art-opacity-dark: 0.95;
   --dsh-celestial-particle-opacity-light: 0.16;
   --dsh-celestial-particle-opacity-dark: 0.2;
-  --dsh-celestial-vignette-opacity: 0.42;
+  /* The vignette paints the panel colour (deep navy in dark mode) over the
+     centre so text stays readable. Heavy values here fight the artwork: at the
+     old 0.42 / 0.82 pair, dark mode read as an empty screen because the mask
+     was dark-on-dark. Reduced so the backdrop survives while the reading area
+     keeps its contrast. */
+  --dsh-celestial-vignette-opacity: 0.24;
   --dsh-celestial-reading-x: 60%;
   --dsh-celestial-particle-mask: radial-gradient(
     ellipse 40% 72% at var(--dsh-celestial-reading-x) 50%,
@@ -37,10 +137,14 @@ body[data-ds-dark-theme] {
 
 [data-dsh-celestial-stage][data-hero] {
   --dsh-celestial-art-opacity-light: 0.78;
-  --dsh-celestial-art-opacity-dark: 0.9;
+  /* The hero selector outranks the narrower-window rules below. Keep the
+     actual landing screen bright, rather than silently falling back to 0.9. */
+  --dsh-celestial-art-opacity-dark: 0.98;
   --dsh-celestial-particle-opacity-light: 0.42;
   --dsh-celestial-particle-opacity-dark: 0.5;
-  --dsh-celestial-vignette-opacity: 0.82;
+  /* The composer has its own opaque surface; a second navy mask over the
+     artwork only hides the planets without improving text readability. */
+  --dsh-celestial-vignette-opacity: 0;
   --dsh-celestial-reading-x: calc(50% + 64px);
   --dsh-celestial-particle-mask: radial-gradient(
     ellipse 390px 235px at var(--dsh-celestial-reading-x) 53%,
@@ -59,7 +163,17 @@ body[data-ds-dark-theme] {
 }
 
 [data-dsh-celestial-art] {
-  background-position: center;
+  /* `contain` letterboxes the art: it fits the whole 1600x900 source inside the
+     element, so on a wider-than-16:9 window there are empty bands left and
+     right. The left band is harmless (the sidebar covers it), but the right band
+     exposes bare background to the right of the drawing's own border, which
+     reads as "the picture just stops".
+
+     `cover` scales the art to fill both axes. Light mode retains left
+     alignment. In the real dark desktop window, that alignment hid the sun
+     beneath the sidebar, so dark mode shifts its art into the workspace.
+     `contain` + `left` shrank the canvas and exposed an empty right band. */
+  background-position: left center;
   background-repeat: no-repeat;
   background-size: cover;
   transition: opacity 300ms var(--ds-ease-in-out, ease);
@@ -81,6 +195,19 @@ body[data-ds-dark-theme] [data-dsh-celestial-art='light'] {
 
 body[data-ds-dark-theme] [data-dsh-celestial-art='dark'] {
   opacity: var(--dsh-celestial-art-opacity-dark);
+  /* In the actual desktop window, left alignment put the sun beneath the
+     sidebar. Shift the composition into the conversation area; the empty
+     strip at the left remains covered by the sidebar. */
+  background-position: 68% center;
+  /* Lift the gold linework away from the similarly coloured navy panel. */
+  filter: brightness(1.35) contrast(1.12) saturate(1.1);
+}
+
+/* The transcript keeps the full composition, but the session header is only
+   a short band above the reading surface. Nudge the picture down so that
+   band lands on open sky instead of slicing through Jupiter. */
+body[data-ds-dark-theme] [data-dsh-celestial-stage][data-transcript] [data-dsh-celestial-art='dark'] {
+  background-position: 68% 132px;
 }
 
 [data-dsh-celestial-vignette] {
@@ -121,7 +248,31 @@ body[data-ds-dark-theme] [data-dsh-particle-field] {
 #root {
   position: relative;
   z-index: 1;
-  background: transparent;
+  background: transparent !important;
+}
+
+/* Desktop (not the browser) paints the whole window from the sidebar token:
+   `[data-windows-titlebar] .frame { background: var(--dsw-specific-sidebar-fill) }`.
+   The attribute lives on <html>. The frame's class is hashed per build, and an
+   unhashed wrapper sits between `#root` and the grid, so the selector walks
+   both levels. Without this the browser shows the sky and the desktop stays flat. */
+[data-windows-titlebar] #root > div,
+[data-windows-titlebar] #root > div > div {
+  background: transparent !important;
+  background-color: transparent !important;
+}
+
+[data-windows-titlebar] [class*='centerCol'] {
+  background: transparent !important;
+  background-color: transparent !important;
+}
+
+/* The sidebar column and the sidebar root both paint the same fill, so a
+   translucent token would stack into a nearly solid panel. Leave the fill
+   translucent for the inner surface and fade, and keep only one layer here. */
+[data-windows-titlebar] [class*='sidebarCol'] {
+  background: transparent !important;
+  background-color: transparent !important;
 }
 
 [data-dsh-celestial-chrome] {
@@ -160,4 +311,33 @@ body[data-ds-dark-theme] [data-dsh-particle-field] {
 
 h1, h2, .dsh-display {
   font-family: var(--dsh-font-display);
+}
+
+/* ---------------------------------------------------------------------------
+   Narrow-window legibility.
+
+   The artwork is bright enough to read on a wide window, but the shell window
+   can be dragged down to a fairly tight size, and at those widths `cover` has
+   to crop harder — the lit left third of the composition takes up proportionally
+   more of the frame, the darker right-hand sky is the only thing left, and the
+   two `--dsw-alias-bg-base` layers above it then read as "empty background".
+
+   Raising the art's own opacity is the correct lever here: it costs nothing on
+   wide windows, darkens nothing (the art IS the dark colour), and keeps the
+   linework separable from the panel it is drawn against.
+
+   These rules apply to the non-hero view. The landing screen's more-specific
+   [data-hero] selector above sets its own dark opacity and vignette values.
+   --------------------------------------------------------------------------- */
+@media (max-width: 1560px) {
+  [data-dsh-celestial-stage] {
+    --dsh-celestial-art-opacity-dark: 0.97;
+  }
+}
+
+@media (max-width: 1280px) {
+  [data-dsh-celestial-stage] {
+    --dsh-celestial-art-opacity-dark: 0.98;
+    --dsh-celestial-vignette-opacity: 0;
+  }
 }
